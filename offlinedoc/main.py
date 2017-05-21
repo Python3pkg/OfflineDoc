@@ -9,7 +9,7 @@ from offlinedoc.core import OfflineDoc
 
 def die(msg, test=True):
   if test:
-    print msg
+    print(msg)
     sys.exit(1)
 
 
@@ -61,9 +61,9 @@ def cmd_new(path=None):
     action = 'created'
     try:
       shutil.copytree(template_path, path)
-    except OSError, e:
+    except OSError as e:
       die('Cannot create dir "%s": %s' % (path, e))
-  print '''Project %(action)s, here's an example nginx config:
+  print('''Project %(action)s, here's an example nginx config:
 
   server {
     listen 80;
@@ -74,7 +74,7 @@ def cmd_new(path=None):
     location = /index.html { expires epoch; }
     location ~ ^/[^\/]+/index.html$ { expires epoch; }
   }
-''' % {'public': os.path.join(os.path.abspath(path), 'public'), 'action': action}
+''' % {'public': os.path.join(os.path.abspath(path), 'public'), 'action': action})
 
 
 def cmd_update(path=None, name=None, version=None):
@@ -101,22 +101,22 @@ def cmd_serve(path=None):
 def cmd_auth(path=None):
   die('Not a valid data dir', not is_project(path))
   od = OfflineDoc(path)
-  user = raw_input('Enter github username: ')
-  password = raw_input('Enter github password: ')
+  user = input('Enter github username: ')
+  password = input('Enter github password: ')
   if user and password:
     od.config['github_auth'] = base64.b64encode('%s:%s' % (user, password))
     od.save_config()
-    print 'Auth saved'
+    print('Auth saved')
   else:
-    print 'Invalid inputs'
+    print('Invalid inputs')
 
 
 def cmd_clear(path=None):
   die('Not a valid data dir', not is_project(path))
-  die('', raw_input('Are you sure to delete? [y/n]') != 'y')
+  die('', input('Are you sure to delete? [y/n]') != 'y')
   try:
     shutil.rmtree(path)
-  except OSError, e:
+  except OSError as e:
     die('Clear data error: %s' % e)
 
 
@@ -125,15 +125,15 @@ def cmd_list(path=None):
   list modules
   '''
   od = OfflineDoc(path if is_project(path) else None)
-  print 'Modules available:\n'
-  for i in od.load_modules().keys():
+  print('Modules available:\n')
+  for i in list(od.load_modules().keys()):
     j = i
     if path:
       k = od.get_latest_version(i)
       if k:
         j = '%s@%s' % (j, k)
-    print ' - %s' % j
-  print
+    print(' - %s' % j)
+  print()
 
 
 def exec_cli(args):
@@ -151,7 +151,7 @@ def exec_cli(args):
 
   if action == 'version':
     import pkg_resources
-    print pkg_resources.require('offlinedoc')[0].version
+    print(pkg_resources.require('offlinedoc')[0].version)
   else:
     sys.exit(usage(args[0]))
 

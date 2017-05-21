@@ -2,7 +2,7 @@
 # coding: utf-8
 # yc@2013/03/20
 
-import sys, os, json, subprocess, urllib2, urlparse, logging, logging.handlers
+import sys, os, json, subprocess, urllib.request, urllib.error, urllib.parse, urllib.parse, logging, logging.handlers
 import subprocess, shutil, re
 from threading import Lock
 from itertools import izip_longest
@@ -19,7 +19,7 @@ class Version(str):
   def __init__(self, ver):
     super(Version, self).__init__(ver)
     try:
-      self._vers = map(int, ver.split('.'))
+      self._vers = list(map(int, ver.split('.')))
     except:
       # fallback to normal string
       pass
@@ -103,7 +103,7 @@ class BaseModule(object):
     # TODO bug: when ODDEBUG=1, stdout && stderr is None
     exe = subprocess.Popen(cmd, stdout=pipe, stderr=pipe, shell=True)
     if os.environ.get('ODDEBUG'):
-      print ' *', cmd
+      print(' *', cmd)
       out, err = [], []
       while exe.poll() is None:
         m = exe.stdout.readline()
@@ -136,14 +136,14 @@ class BaseModule(object):
     curl
     '''
     try:
-      req = urllib2.Request(url)
+      req = urllib.request.Request(url)
       if basic_auth:
         req.add_header('Authorization', 'Basic %s' % basic_auth)
-      fp = urllib2.urlopen(req)
+      fp = urllib.request.urlopen(req)
       if jsonret:
         return json.load(fp)
       return fp.read()
-    except Exception, e:
+    except Exception as e:
       if not suppress_error:
         self.logger.warn('http_get error: %s => %s' % (url, e))
     return False
@@ -186,7 +186,7 @@ class BaseModule(object):
       '--convert-links --no-host-directories --adjust-extension '
       '--no-check-certificate --timeout=60 --page-requisites '
       '--no-cookies --no-parent -o /dev/null ')
-    for i, j in kwargs.items():
+    for i, j in list(kwargs.items()):
       if j is not None:
         cmd += '--%s=%s ' % (i, j)
       else:
@@ -200,7 +200,7 @@ class BaseModule(object):
 
   def save_favicon(self):
     if not self.homepage and hasattr(self, 'url'):
-      self.homepage = urlparse.urlparse(self.url).netloc
+      self.homepage = urllib.parse.urlparse(self.url).netloc
     if not self.homepage or getattr(self, 'fetched_favicon', False):
       return
     self.fetched_favicon = True
@@ -215,14 +215,14 @@ class BaseModule(object):
     try:
       shutil.rmtree(self.source_dir)
       os.makedirs(self.source_dir)
-    except OSError, e:
+    except OSError as e:
       self.logger.warn('clear_source error: %s' % e)
 
   def clear_public(self):
     try:
       shutil.rmtree(self.public_dir)
       os.makedirs(self.public_dir)
-    except OSError, e:
+    except OSError as e:
       self.logger.warn('clear_public error: %s' % e)
 
   def entry(self, version):
@@ -280,7 +280,7 @@ class BaseModule(object):
     try:
       with self._update(version) as ret:
         download_dir = self.post_update(version, ret)
-    except Exception, e:
+    except Exception as e:
       self.logger.error('update error: %s' % e)
       return
 
@@ -305,7 +305,7 @@ class BaseModule(object):
           self.attrs['latest'] = str(max(Version(i) for i in self.attrs['versions']))
         self.generate_index()
         return self.attrs
-      except OSError, e:
+      except OSError as e:
         self.logger.error('Cannot copy dir: %s => %s (%s)' % (download_dir, \
                           dst_dir, e))
     else:
@@ -432,14 +432,14 @@ class SingleHtmlModule(BaseModule):
   def entry(self, version):
     return os.path.basename(
       os.path.normpath(
-        urlparse.urlparse(self.url).path
+        urllib.parse.urlparse(self.url).path
       )
     )
 
   @contextmanager
   def _update(self, version=None):
     self.clear_source()
-    parsed = urlparse.urlparse(self.url)
+    parsed = urllib.parse.urlparse(self.url)
     path = os.path.normpath(parsed.path)
     options = {'cut-dirs': path.count('/') - 1, 'domains': parsed.netloc}
     ret = self.wget(self.url, self.source_dir, **options)

@@ -15,7 +15,7 @@ class Module(BaseModule):
 
   def _new_versions(self, cur_ver):
     ret = self.http_get('http://docs.python.org/ftp/python/doc/')
-    versions = map(Version, re.findall(r'<a href="([0-9]\.[\.0-9a-zA-Z]+)/">', ret))
+    versions = list(map(Version, re.findall(r'<a href="([0-9]\.[\.0-9a-zA-Z]+)/">', ret)))
     return sorted(i for i in versions if i > cur_ver)
 
   def post_update(self, version, ret=None):

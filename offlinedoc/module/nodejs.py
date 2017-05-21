@@ -15,7 +15,7 @@ class Module(BaseModule):
 
   def _new_versions(self, cur_ver):
     ret = self.http_get('http://nodejs.org/docs/')
-    versions = map(Version, re.findall(r'<a href="v([\.0-9]+)/">', ret))
+    versions = list(map(Version, re.findall(r'<a href="v([\.0-9]+)/">', ret)))
     return sorted(i for i in versions if i > cur_ver)
 
   def post_update(self, version, ret=None):

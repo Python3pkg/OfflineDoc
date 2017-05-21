@@ -35,7 +35,7 @@ class Module(GitModule):
       ver = Version(obj['repos']['elasticsearch']['current'])
       if ver > cur_ver:
         return ver
-    except Exception, e:
+    except Exception as e:
       self.logger.warn('Parse version error: %s' % e)
     return []
 

@@ -3,7 +3,7 @@
 # yc@2013/05/10
 
 import os, logging, yaml, sys, imp, glob, datetime
-from module._base import Version
+from .module._base import Version
 from jinja2 import Environment, FileSystemLoader
 
 
@@ -48,14 +48,14 @@ class OfflineDoc(object):
     try:
       self.config = yaml.safe_load(open(self.file_config))
       assert isinstance(self.config, dict)
-    except Exception, e:
+    except Exception as e:
       self.logger.error('Cannot load config: %s' % e)
 
   def save_config(self):
     try:
       with open(self.file_config, 'w+') as fp:
         fp.write(yaml.safe_dump(self.config))
-    except Exception, e:
+    except Exception as e:
       self.logger.error('Cannot save config: %s' % e)
 
   def load_modules(self, force=False):
@@ -82,7 +82,7 @@ class OfflineDoc(object):
       else:
         self.module_counter += 1
         self.modules[name] = m.Module
-    except Exception, e:
+    except Exception as e:
       self.logger.warn('Cannot load module from %s: %s' % (path, e))
 
   def get_module(self, name):
@@ -134,7 +134,7 @@ class OfflineDoc(object):
     生成 modules 索引
     '''
     tpl_index = self.jinja_env.get_template('index.html')
-    modules = self.load_modules().keys()
+    modules = list(self.load_modules().keys())
     for i in modules:
       self.get_module(i).generate_index()
     last_update = self.config.get('last_update', now())
